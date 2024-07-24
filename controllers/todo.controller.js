@@ -16,7 +16,7 @@ const postTodo = async (req, res) => {
   try {
     // const createTodo = await Todo.create({ ...req.body, userId });
     const createTodo = await Todo.create({ ...req.body });
-    res.status(200).json(createTodo);
+    res.status(201).json(createTodo);
   } catch (err) {
     console.log(err);
     res.status(500).json({ msg: err });

@@ -1,19 +1,17 @@
 const request = require("supertest");
 const app = require("../app");
 const assert = require("assert");
-const mongoose = require("mongoose");
+// const mongoose = require("mongoose");
 
 const { connect, disconnectDB } = require("../db/connectDB");
-beforeEach((done) => {
-  mongoose.connect(process.env.MONGO_URI);
-  // connect(process.env.MONGO_URI);
-  console.log(done);
+beforeEach(async () => {
+  // mongoose.connect(process.env.MONGO_URI);
+  await connect(process.env.MONGO_URI).then(() => console.log("ok"));
 });
 
-afterEach((done) => {
-  mongoose.connection.close();
-  // disconnectDB();
-  console.log(done);
+afterEach(async () => {
+  // await mongoose.connection.close();
+  await disconnectDB();
 });
 
 describe("test / GET route", () => {
@@ -29,6 +27,7 @@ describe("test / GET route", () => {
 });
 
 describe("CRUD routes", () => {
+  let todoId;
   test("test GET route", async () => {
     const response = await request(app).get("/todo");
     expect(response.status).toBe(200);
@@ -42,11 +41,32 @@ describe("CRUD routes", () => {
       userId: "66828d89d2b3a919bc1be26d",
     });
 
+    todoId = response.body._id;
     expect(response.status).toBe(201);
-    expect(res.body.title).toBe("todo #1");
-    expect(res.body.description).toBe("it is desc for todo #1");
-    expect(res.body.isCompleted).toBeFalsy();
-    expect(res.body.userId).toBe("66828d89d2b3a919bc1be26d");
+    expect(response.body.title).toBe("todo #1");
+    expect(response.body.description).toBe("it is desc for todo #1");
+    expect(response.body.isCompleted).toBeFalsy();
+    expect(response.body.userId).toBe("66828d89d2b3a919bc1be26d");
+  });
+
+  test("test PATCH route", async () => {
+    const response = await request(app).patch(`/todo/${todoId}`).send({
+      title: "todo #2",
+      description: "it is desc for todo #2",
+      userId: "66828d89d2b3a919bc1be26d",
+    });
+
+    expect(response.status).toBe(200);
+    expect(response.body.title).toBe("todo #2");
+    expect(response.body.description).toBe("it is desc for todo #2");
+    expect(response.body.isCompleted).toBeFalsy();
+    expect(response.body.userId).toBe("66828d89d2b3a919bc1be26d");
+  });
+
+  test("test DELETE route", async () => {
+    const response = await request(app).delete(`/todo/${todoId}`);
+
+    expect(response.status).toBe(200);
   });
 });
 
