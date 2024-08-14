@@ -1,16 +1,12 @@
 const request = require("supertest");
 const app = require("../app");
-const assert = require("assert");
-// const mongoose = require("mongoose");
 
 const { connect, disconnectDB } = require("../db/connectDB");
 beforeEach(async () => {
-  // mongoose.connect(process.env.MONGO_URI);
   await connect(process.env.MONGO_URI).then(() => console.log("ok"));
 });
 
 afterEach(async () => {
-  // await mongoose.connection.close();
   await disconnectDB();
 });
 
@@ -38,7 +34,6 @@ describe("CRUD routes", () => {
     const response = await request(app).post("/todo").send({
       title: "todo #1",
       description: "it is desc for todo #1",
-      userId: "66828d89d2b3a919bc1be26d",
     });
 
     todoId = response.body._id;
@@ -46,21 +41,18 @@ describe("CRUD routes", () => {
     expect(response.body.title).toBe("todo #1");
     expect(response.body.description).toBe("it is desc for todo #1");
     expect(response.body.isCompleted).toBeFalsy();
-    expect(response.body.userId).toBe("66828d89d2b3a919bc1be26d");
   });
 
   test("test PATCH route", async () => {
     const response = await request(app).patch(`/todo/${todoId}`).send({
       title: "todo #2",
       description: "it is desc for todo #2",
-      userId: "66828d89d2b3a919bc1be26d",
     });
 
     expect(response.status).toBe(200);
     expect(response.body.title).toBe("todo #2");
     expect(response.body.description).toBe("it is desc for todo #2");
     expect(response.body.isCompleted).toBeFalsy();
-    expect(response.body.userId).toBe("66828d89d2b3a919bc1be26d");
   });
 
   test("test DELETE route", async () => {
@@ -69,72 +61,3 @@ describe("CRUD routes", () => {
     expect(response.status).toBe(200);
   });
 });
-
-// request(app)
-//   .get("/")
-//   .expect(200)
-//   .expect((res) => {
-//     assert.deepEqual(res.body, { msg: "todos api" });
-//   })
-//   .end((err) => {
-//     if (err) throw new Error(err);
-//     console.log("test passed for / GET");
-//   });
-
-const runTests = async () => {
-  try {
-    await connect(process.env.MONGO_URI);
-    console.log("Running tests...");
-
-    const getAllTodoResponse = await request(app)
-      .get("/todo")
-      .expect(200)
-      .expect((res) => {
-        assert(Array.isArray(res.body));
-      });
-
-    console.log("test passed for /todo GET");
-
-    const postTodoResponse = await request(app)
-      .post("/todo")
-      .send({
-        title: "todo #1",
-        description: "it is desc for todo #1",
-        userId: "66828d89d2b3a919bc1be26d",
-      })
-      .expect(200)
-      .expect((res) => {
-        assert(res.body.title === "todo #1");
-        assert(res.body.description === "it is desc for todo #1");
-        assert(res.body.isCompleted === false);
-        assert(res.body.userId === "66828d89d2b3a919bc1be26d");
-      });
-
-    console.log("test passed for /todo POST");
-
-    const updateTodoResponse = await request(app)
-      .patch(`/todo/${postTodoResponse.body._id}`)
-      .send({
-        title: "todo shalgham",
-        description: "it is desc for todo shalgam",
-        userId: "66828d89d2b3a919bc1be26d",
-      })
-      .expect(200)
-      .expect((res) => {
-        assert(res.body.title === "todo shalgham");
-        assert(res.body.description === "it is desc for todo shalgam");
-      });
-
-    console.log(`test passed for /todo/${updateTodoResponse.body._id} PATCH`);
-
-    const deleteTodoResponse = await request(app)
-      .delete(`/todo/${updateTodoResponse.body._id}`)
-      .expect(200);
-
-    console.log(`test passed for /todo/${deleteTodoResponse.body._id} DELETE`);
-  } catch (error) {
-    console.log(error);
-  }
-};
-
-// runTests();

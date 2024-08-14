@@ -11,10 +11,7 @@ const getAllTodos = async (req, res) => {
 };
 
 const postTodo = async (req, res) => {
-  // const userId = req.userId;
-  // console.log(userId);
   try {
-    // const createTodo = await Todo.create({ ...req.body, userId });
     const createTodo = await Todo.create({ ...req.body });
     res.status(201).json(createTodo);
   } catch (err) {
