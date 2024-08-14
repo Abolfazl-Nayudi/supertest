@@ -7,8 +7,6 @@ const {
   updateTodo,
 } = require("../controllers/todo.controller");
 
-const verifyJwtToken = require("../middleware/authMiddleware");
-
 const router = Router();
 
 /**
